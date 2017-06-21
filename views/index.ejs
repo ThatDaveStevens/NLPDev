@@ -1,0 +1,30 @@
+<head>
+    <link rel="stylesheet" type="text/css" href="mystyle.css">
+</head>
+
+<form method="post" action="/transcript/add">
+    <div class="half left cf">
+        <font face="Courier New"><input type="text" size="45" name="transcript_name" placeholder="Transcript Name"></font></div>
+    <div class="half left cf"><font face="Courier New">
+            <br>
+            <input type="text" size="90" name="transcript_description" placeholder="transcript description">
+        </font></div>
+
+    <div class="half left cf"><font face="Courier New">
+            <br>
+            <input type="text" size="90" name="transcript_author" placeholder="transcript speaker or author">
+        </font></div>
+
+    <div class="half right cf">
+        <font face="Courier New">
+            <br>
+            <textarea name="transcript_text" type="text" id="input-message" placeholder="Transcript Text"></textarea>
+        </font></div>
+    <font face="Courier New"><input type="submit" value="Submit" id="input-submit"></font>
+</form>
+
+<ul>
+    <% movies.forEach (function(movie){ %>
+    <li><%=movie.name%></li>
+    <%})%>
+</ul>
