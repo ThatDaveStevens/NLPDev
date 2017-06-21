@@ -15,6 +15,13 @@
   ],
   "author": "David Stevens",
   "license": "ISC",
+  "dependencies":{
+	"express":"*",
+	"body-parser":"*",
+	"ejs":"^2.4.2",
+	"morgan":"*",
+	"neo4j-driver":"*"
+	},
   "bugs": {
     "url": "https://github.com/EnglishSid/NLPDev/issues"
   },
