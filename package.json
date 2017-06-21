@@ -1,0 +1,22 @@
+{
+  "name": "nlpdev",
+  "version": "1.0.0",
+  "description": "Natural Language Processing with Neo4j",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EnglishSid/NLPDev.git"
+  },
+  "keywords": [
+    "neo4j"
+  ],
+  "author": "David Stevens",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EnglishSid/NLPDev/issues"
+  },
+  "homepage": "https://github.com/EnglishSid/NLPDev#readme"
+}
