@@ -1,0 +1,20 @@
+<p>
+  <span style="font-family: &quot;Courier New&quot;; color: rgb(0, 0, 0); font-size: 14px;">
+          
+          Select the transcript to review
+<p><br></p>
+<p>
+  <form>
+      <select name="transcripts" id="Transcripts">
+
+<% Transcripts.forEach (function(Transcripts){ %>
+    <option value="<%=Transcripts.name%>"><%=Transcripts.name%></option>
+    <%})%>
+    </select>
+    
+   </form>
+   <br>
+
+<a href="/">[RETURN]</a>
+
+</span>

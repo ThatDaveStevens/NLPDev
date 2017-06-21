@@ -1,0 +1,25 @@
+
+<h3><font face="Courier New">Add a new transcript</font></h3>
+
+<form method="post" action="/transcript/add">
+    <div class="half left cf">
+        <font face="Courier New"><input type="text" size="45" name="transcript_name" placeholder="Transcript Name"></font></div>
+    <div class="half left cf"><font face="Courier New">
+            <br>
+            <input type="text" size="90" name="transcript_description" placeholder="transcript description">
+        </font></div>
+
+    <div class="half left cf"><font face="Courier New">
+            <br>
+            <input type="text" size="45" name="transcript_author" placeholder="transcript speaker or author">
+        </font></div>
+
+    <div class="half right cf">
+        <font face="Courier New">
+            <br>
+            <textarea name="transcript_text" rows="10" cols="90" type="text" id="input-message" placeholder="Transcript Text"></textarea>
+        </font></div>
+        <br>
+    <font face="Courier New"><input type="submit" value="Submit" id="input-submit"></font>    
+</form>
+    <font face="Courier New"><a href="/"><button>Cancel</button></a></font>
