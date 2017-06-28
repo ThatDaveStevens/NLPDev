@@ -1,0 +1,21 @@
+<p>
+  <span style="font-family: Courier New; font-size: 14px;">
+Paper Name : <b><%=transcriptNameReview %></b>
+<br><br>
+<b><u>Top Words</u></b>
+<ul style="font-family: Courier New; font-size: 14px;">
+<% WordsList.forEach (function(Word){ %>
+         <li>   <%=Word.word%> : <%=Word.count%> </li>
+            <% }) %>
+</ul>
+<br>
+<b><u>Key Themes</u></b>
+<ul style="font-family: Courier New; font-size: 14px;">
+<% Themes.forEach (function(Theme){ %>
+         <li>   <%=Theme.phrase%> : <%=Theme.weight%> </li>
+            <% }) %>
+</ul>
+<br>
+<br>
+<a href="/">[RETURN]</a>
+  </span>

@@ -1,20 +1,30 @@
 <p>
-  <span style="font-family: &quot;Courier New&quot;; color: rgb(0, 0, 0); font-size: 14px;">
+  <span style="font-family: Courier New; font-size: 14px;">
           
           Select the transcript to review
-<p><br></p>
 <p>
-  <form>
-      <select name="transcripts" id="Transcripts">
 
-<% Transcripts.forEach (function(Transcripts){ %>
-    <option value="<%=Transcripts.name%>"><%=Transcripts.name%></option>
-    <%})%>
-    </select>
-    
+  <form method="post" action="/review2"><font face="Courier New">
+      <select id="TranscriptList" onchange="GetTranscipt(this)" name="transcripts" id="Transcripts">
+            <option value="null">Please select</option>
+            <option value="AllTrans">All Transcripts</option>
+            <% Transcripts.forEach (function(Transcripts){ %>
+            <option value="<%=Transcripts.name%>" font face="Courier New"><%=Transcripts.name%></option>
+            <%})%>
+        </select>
+    <font face="Courier New"><input type="submit" value="Review" id="input-submit"></font>
+    </font>
    </form>
    <br>
 
 <a href="/">[RETURN]</a>
 
+
+
 </span>
+
+<script>
+    {document.getElementById('f1').innerHTML = document.listofTrans.name.value;}
+    </script>
+
+    <p id='f1'></p>

@@ -52,35 +52,17 @@ app.post('/transcript/add',function(req, res){
     var finalTranscriptWords=punctuationless.replace(/'/g, "\#");
     var finalTranscriptWords2 = finalTranscriptWords.replace(/\s{2,}/g," ");
 
-    var stopWords="'?','.',',','a','about','above','after',";
-    stopWords += "'again','against','all','am','an','and',";
-    stopWords += "'any','are','arent','as','at','be','because',";
-    stopWords += "'been','before','being','below','between','both','but',";
-    stopWords += "'by','can#t','cannot','could','couldn\'t','did','didn\'t',";
-    stopWords += "'do','does','doesn\'t','doing','don\'t','down','during','each',";
-    stopWords += "'few','for','from','further','had','hadn\'t','has','hasn\'t',";
-    stopWords += "'have','haven\'t','having','he','he\'d','he\'ll','he\'s','her',";
-    stopWords += "'here','here\'s','hers','herself','him','himself','his','how',";
-    stopWords += "'how\'s','i','i\'d','i\'ll','i\'m','i\'ve','if','in','into','is',";
-    stopWords += "'isn\'t','it','it\'s','its','itself','let\'s','me','more','most',";
-    stopWords += "'mustn\'t','my','myself','no','nor','not','of','off','on','once',";
-    stopWords += "'only','or','other','ought','our','ours','ourselves','out','over',";
-    stopWords += "'own','same','shan\'t','she','she\'d','she\'ll','she\'s','should',";
-    stopWords += "'shouldn\'t','so','some','such','than','that','that\'s','the','their',";
-    stopWords += "'theirs','them','themselves','then','there','there\'s','these','they',";
-    stopWords += "'they\'d','they\'ll','they\'re','they\'ve','this','those','through','to',";
-    stopWords += "'too','under','until','up','very','was','wasn\'t','we','we\'d','we\'ll',";
-    stopWords += "'we\'re','we\'ve','were','weren\'t','what','what\'s','when','when\'s',";
-    stopWords += "'where','where\'s','which','while','who','who\'s','whom','why','why\'s',";
-    stopWords += "'with','won\'t','would','wouldn\'t','you','you\'d','you\'ll','you\'re',";
-    stopWords += "'you\'ve','your','yours','yourself','yourselves'";
+    var stopWords="'?','.',',','a','about','above','after','again','against','all','am','an','and','any','are','aren\\'t','as','at','be','because','been','before','being','below','between','both','but','by','can\\'t','cannot','could','couldn\\'t','did','didn\\'t','do','does','doesn\\'t','doing','don\\'t','down','during','each','few','for','from','further','had','hadn\\'t','has','hasn\\'t','have','haven\\'t','having','he','he\\'d','he\\'ll','he\\'s','her','here','here\\'s','hers','herself','him','himself','his','how','how\\'s','i','i\\'d','i\\'ll','i\\'m','i\\'ve','if','in','into','is','isn\\'t','it','it\\'s','its','itself','let\\'s','me','more','most','mustn\\'t','my','myself','no','nor','not','of','off','on','once','only','or','other','ought','our','ours','ourselves','out','over','own','same','shan\\'t','she','she\\'d','she\\'ll','she\\'s','should','shouldn\\'t','so','some','such','than','that','that\\'s','the','their','theirs','them','themselves','then','there','there\\'s','these','they','they\\'d','they\\'ll','they\\'re','they\\'ve','this','those','through','to','too','under','until','up','very','was','wasn\\'t','we','we\\'d','we\\'ll','we\\'re','we\\'ve','were','weren\\'t','what','what\\'s','when','when\\'s','where','where\\'s','which','while','who','who\\'s','whom','why','why\\'s','with','won\\'t','would','wouldn\\'t','you','you\\'d','you\\'ll','you\\'re','you\\'ve','your','yours','yourself','yourselves'";
    
    console.log("-----------------------");
+   console.log("stopwords");
+   console.log(stopWords);
+   console.log("query:")
    console.log(finalTranscriptWords2);
    console.log("-----------------------");
 
     var WordImportQuery = "WITH split(tolower('" + finalTranscriptWords2 + "'), ' ') AS words ";
-    WordImportQuery += "WITH [w in words WHERE NOT w IN ['"+ stopWords +"']] AS text ";
+    WordImportQuery += "WITH [w in words WHERE NOT w IN ["+ stopWords +"]] AS text ";
     WordImportQuery+="UNWIND range (0,size(text)-2)as i ";
     WordImportQuery+="MERGE (w1:Word {name: text[i]}) ";
     WordImportQuery+="ON CREATE SET w1.count = 1 ON MATCH SET w1.count = w1.count +1 ";
@@ -105,16 +87,12 @@ app.post('/transcript/add',function(req, res){
     AuthorImport +="MATCH (p:Person {name:'"+ TranscriptAuthor + "'}) ";
     AuthorImport +="MERGE  (t)-[:AUTHOR]->(p) ";
 
-
-
-
 //first create the transcript node    
 session
     .run('CREATE (t:transcript {name:{transcriptParam},description:{descriptionParam},fulltext:{TranscriptTextParam}}) RETURN t.name', {transcriptParam:transcriptName,descriptionParam:transcriptDescription,TranscriptTextParam:TranscriptWords})
     .then(function (result){
         console.log("transcript created");
         console.log(WordImportQuery);
-
     })
     .catch(function(err){
         console.log(err);
@@ -136,27 +114,35 @@ session
 
     .run (AuthorImport)
     .then (function (result){
-        console.log("author relationship created")        
+        console.log("author relationship created")    
     })
     .catch(function(err){
         console.log(err);
     });
 
-//import the words
 session
     .run(WordImportQuery)
     .then(function (result){
-        console.log("imported words");
+       console.log("imported words");
     })
     .catch(function(err){
         console.log(err);
     });
 
-//run the clean query
+//run the clean queries
     session
     .run('match (w:Word) Where w.name CONTAINS "#" detach delete w')
     .then(function (result){
-        console.log("clean-up script completed");
+        console.log("clean-up script 1 completed");
+    })
+    .catch(function(err){
+        console.log(err);
+    });
+
+session
+    .run('MATCH (a:Word) WHERE size(a.name)<= 1 detach delete a')
+    .then(function (result){
+        console.log("clean-up script 2 completed");
         console.log("IMPORT COMPLETE")
         res.redirect('/');
         session.close();
@@ -165,9 +151,6 @@ session
         console.log(err);
     });
 
-    
-
-    
 
 });
 
@@ -176,10 +159,9 @@ app.get('/', function (req, res) {
 })
 
 app.get('/review', function (req, res) {
-//need to get some starting values into the review (e.g. )
  session 
     .run('MATCH(t:transcript) return t')
-    .then(function(result){
+    .then(function(result,returnVar){
         var nodeArr =[];
         result.records.forEach(function(record) {
                 nodeArr.push({
@@ -200,6 +182,58 @@ app.get('/about', function (req, res) {
   res.render('about')
 })
 
+
+//grab the selected transcript name and build, run and return the results
+app.post('/review2', function(req,res){
+    //get the name of the transcript
+    var transcriptName = (req.body.transcripts.trim());
+    if (transcriptName=="AllTrans")
+    {
+        transcriptName = "All loaded Transcripts";
+        TopWordsQuery ="match (w:Word) return  w.name as Word, w.count as Count order by w.count desc LIMIT 25";
+        TopThemes ="MATCH p=(:Word)-[r:NEXT*1..3]->(:Word) WITH p WITH reduce(s=0,x IN relationships(p) | s + x.count) AS total, p WITH nodes(p) AS text, 1.0*total/size(nodes(p)) as weight RETURN extract(x IN text | x.name) AS phrase, weight ORDER BY weight DESC LIMIT 10";
+    }
+    else
+    {
+        TopWordsQuery ="match (t:transcript{name:'"+ transcriptName +"'})-[r:INCLUDED]-(w:Word) return w.name as Word, r.count as Count order by r.count desc LIMIT 25";
+        TopThemes ="MATCH p=(:Word)-[r:NEXT*1..3]->(:Word) WITH p WITH reduce(s=0,x IN relationships(p) | s + x.count) AS total, p WITH nodes(p) AS text, 1.0*total/size(nodes(p)) as weight RETURN extract(x IN text | x.name) AS phrase, weight ORDER BY weight DESC LIMIT 10";
+    }
+
+var CountArr =[];
+var ThemeArr =[];
+session 
+    .run(TopWordsQuery)
+    .then(function(result){
+        result.records.forEach(function(record) {
+                CountArr.push({
+                    word: record.get(0),
+                    count: record.get(1)
+                });
+        }); 
+    })
+    .catch(function(err){
+        console.log(err)
+    })   
+
+    session 
+    .run(TopThemes)
+    .then(function(result){
+        result.records.forEach(function(record) {
+                ThemeArr.push({
+                    phrase: record.get(0),
+                    weight: record.get(1)
+                });
+        }); 
+        res.render('review2', {
+            transcriptNameReview : transcriptName,
+            Themes : ThemeArr,
+            WordsList: CountArr
+        });
+    })
+    .catch(function(err){
+        console.log(err)
+    })  
+});
 
 
 
