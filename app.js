@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(express.static(path.join(__dirname,'public')));
 
-var driver = neo4j.driver('bolt://localhost',neo4j.auth.basic('neo4j','sidney'));
+var driver = neo4j.driver('bolt://localhost',neo4j.auth.basic('neo4j','neo4j'));
 var session=driver.session();
 
 app.get('/add',function (req,res){
@@ -66,11 +66,11 @@ app.post('/transcript/add',function(req, res){
     WordImportQuery+="UNWIND range (0,size(text)-2)as i ";
     WordImportQuery+="MERGE (w1:Word {name: text[i]}) ";
     WordImportQuery+="ON CREATE SET w1.count = 1 ON MATCH SET w1.count = w1.count +1 ";
-    WordImportQuery+=" MERGE (w2:Word {name: text[i+1]}) ";
+    WordImportQuery+="MERGE (w2:Word {name: text[i+1]}) ";
 	WordImportQuery+="ON CREATE SET w2.count = 1 ON MATCH SET w2.count = w2.count +1 ";
     WordImportQuery+="MERGE (w1)-[r:NEXT]->(w2) ";
     WordImportQuery+="ON CREATE SET r.count = 1 ";
- 	WordImportQuery+="ON MATCH SET r.count = r.count+1 ";
+    WordImportQuery+="ON MATCH SET r.count = r.count+1 ";
     WordImportQuery+="WITH w1,w2 ";
     WordImportQuery+="Match (p:transcript) ";
     WordImportQuery+="WHERE p.name='" + transcriptName + "' ";
@@ -78,8 +78,19 @@ app.post('/transcript/add',function(req, res){
 	WordImportQuery+="ON CREATE SET r1.count = 1 ";
 	WordImportQuery+="ON MATCH SET r1.count = r1.count+1 ";
     WordImportQuery+="MERGE (p)-[r2:INCLUDED]->(w2) ";
-    WordImportQuery+="	ON CREATE SET r2.count = 1 ";
-	WordImportQuery+="ON MATCH SET r2.count = r2.count+1; ";
+    WordImportQuery+="ON CREATE SET r2.count = 1 ";
+    WordImportQuery+="ON MATCH SET r2.count = r2.count+1 ";
+    WordNetQuery +="MATCH (n:WN_Word {word:text[i]}) ";
+    WordNetQuery +="MATCH (w3:Word {name:text[i]}) ";
+    WordNetQuery +="MERGE (w3)-[:WN_LINK]->(n);";
+
+    var WordNetQuery = "WITH split(tolower('" + finalTranscriptWords2 + "'), ' ') AS words ";
+    WordNetQuery += "WITH [w in words WHERE NOT w IN ["+ stopWords +"]] AS text ";
+    WordNetQuery +="UNWIND range (0,size(text)-2)as i ";
+    WordNetQuery +="MATCH (n:WN_Word {word:text[i]}) ";
+    WordNetQuery +="MATCH (w1:Word {name:text[i]}) ";
+    WordNetQuery +="MERGE (w1)-[:WN_LINK]->(n);";
+    
     
     var AuthorCreate = "MERGE (n:Person {name:'" + TranscriptAuthor + "'}); "; 
 
@@ -128,6 +139,17 @@ session
     .catch(function(err){
         console.log(err);
     });
+
+//connect towordnet 
+//    session
+ //   .run(WordNetQuery)
+  //  .then(function (result){
+   //    console.log("Connected to WordNet");
+//    })
+  //  .catch(function(err){
+   //     console.log(err);
+  //  });
+
 
 //run the clean queries
     session
