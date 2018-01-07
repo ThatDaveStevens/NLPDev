@@ -6,6 +6,10 @@ var neo4j = require('neo4j-driver').v1;
 var app = express();
 
 
+var datajson = require('./views/miserables.json');
+
+
+
 //View engine
 app.set ('views',path.join(__dirname,'views'));
 app.set('view engine','ejs');
@@ -51,19 +55,25 @@ app.post('/transcript/add',function(req, res){
     var punctuationless = s.replace(/'[.,\/#!$%?\^&\*;:{}=\-_`~()]/g,"");
     var finalTranscriptWords=punctuationless.replace(/'/g, "\#");
     var finalTranscriptWords2 = finalTranscriptWords.replace(/\s{2,}/g," ");
+    var finalTranscriptWords3 = finalTranscriptWords2.replace(/'[.,\/#!$%?\^&\*;:{}=\-_`~()]/g,"");
 
-    var stopWords="'?','.',',','a','about','above','after','again','against','all','am','an','and','any','are','aren\\'t','as','at','be','because','been','before','being','below','between','both','but','by','can\\'t','cannot','could','couldn\\'t','did','didn\\'t','do','does','doesn\\'t','doing','don\\'t','down','during','each','few','for','from','further','had','hadn\\'t','has','hasn\\'t','have','haven\\'t','having','he','he\\'d','he\\'ll','he\\'s','her','here','here\\'s','hers','herself','him','himself','his','how','how\\'s','i','i\\'d','i\\'ll','i\\'m','i\\'ve','if','in','into','is','isn\\'t','it','it\\'s','its','itself','let\\'s','me','more','most','mustn\\'t','my','myself','no','nor','not','of','off','on','once','only','or','other','ought','our','ours','ourselves','out','over','own','same','shan\\'t','she','she\\'d','she\\'ll','she\\'s','should','shouldn\\'t','so','some','such','than','that','that\\'s','the','their','theirs','them','themselves','then','there','there\\'s','these','they','they\\'d','they\\'ll','they\\'re','they\\'ve','this','those','through','to','too','under','until','up','very','was','wasn\\'t','we','we\\'d','we\\'ll','we\\'re','we\\'ve','were','weren\\'t','what','what\\'s','when','when\\'s','where','where\\'s','which','while','who','who\\'s','whom','why','why\\'s','with','won\\'t','would','wouldn\\'t','you','you\\'d','you\\'ll','you\\'re','you\\'ve','your','yours','yourself','yourselves'";
-   
+
+    var stopWords="'also','can','2012','2014','hp','within','new','hewlett','packard','hpe','2013','2015','2016','dec','dxc','hpes','2017','via','?','.',',','a','about','above','after','again','against','all','am','an','and','any','are','aren\\'t','as','at','be','because','been','before','being','below','between','both','but','by','can\\'t','cannot','could','couldn\\'t','did','didn\\'t','do','does','doesn\\'t','doing','don\\'t','down','during','each','few','for','from','further','had','hadn\\'t','has','hasn\\'t','have','haven\\'t','having','he','he\\'d','he\\'ll','he\\'s','her','here','here\\'s','hers','herself','him','himself','his','how','how\\'s','i','i\\'d','i\\'ll','i\\'m','i\\'ve','if','in','into','is','isn\\'t','it','it\\'s','its','itself','let\\'s','me','more','most','mustn\\'t','my','myself','no','nor','not','of','off','on','once','only','or','other','ought','our','ours','ourselves','out','over','own','same','shan\\'t','she','she\\'d','she\\'ll','she\\'s','should','shouldn\\'t','so','some','such','than','that','that\\'s','the','their','theirs','them','themselves','then','there','there\\'s','these','they','they\\'d','they\\'ll','they\\'re','they\\'ve','this','those','through','to','too','under','until','up','very','was','wasn\\'t','we','we\\'d','we\\'ll','we\\'re','we\\'ve','were','weren\\'t','what','what\\'s','when','when\\'s','where','where\\'s','which','while','who','who\\'s','whom','why','why\\'s','with','won\\'t','would','wouldn\\'t','you','you\\'d','you\\'ll','you\\'re','you\\'ve','your','yours','yourself','yourselves'";
+    //stopWords+=",'hp','within','new','hewlett','packard','hpe','hp's','2013','2014','2015','2016','dec'";
+    //stopWords+=",'dxc','hpes','2017','via'";
+
+   // var stopWords="'blah'";
+
    console.log("-----------------------");
    console.log("stopwords");
    console.log(stopWords);
    console.log("query:")
-   console.log(finalTranscriptWords2);
+   console.log(finalTranscriptWords3);
    console.log("-----------------------");
 
-    var WordImportQuery = "WITH split(tolower('" + finalTranscriptWords2 + "'), ' ') AS words ";
+    var WordImportQuery = "WITH split(tolower('" + finalTranscriptWords3 + "'), ' ') AS words ";
     WordImportQuery += "WITH [w in words WHERE NOT w IN ["+ stopWords +"]] AS text ";
-    WordImportQuery+="UNWIND range (0,size(text)-2)as i ";
+    WordImportQuery+="UNWIND range (0,size(text)-2) as i ";
     WordImportQuery+="MERGE (w1:Word {name: text[i]}) ";
     WordImportQuery+="ON CREATE SET w1.count = 1 ON MATCH SET w1.count = w1.count +1 ";
     WordImportQuery+="MERGE (w2:Word {name: text[i+1]}) ";
@@ -80,13 +90,11 @@ app.post('/transcript/add',function(req, res){
     WordImportQuery+="MERGE (p)-[r2:INCLUDED]->(w2) ";
     WordImportQuery+="ON CREATE SET r2.count = 1 ";
     WordImportQuery+="ON MATCH SET r2.count = r2.count+1 ";
-    WordNetQuery +="MATCH (n:WN_Word {word:text[i]}) ";
-    WordNetQuery +="MATCH (w3:Word {name:text[i]}) ";
-    WordNetQuery +="MERGE (w3)-[:WN_LINK]->(n);";
+
 
     var WordNetQuery = "WITH split(tolower('" + finalTranscriptWords2 + "'), ' ') AS words ";
     WordNetQuery += "WITH [w in words WHERE NOT w IN ["+ stopWords +"]] AS text ";
-    WordNetQuery +="UNWIND range (0,size(text)-2)as i ";
+    WordNetQuery +="UNWIND range (0,size(text)-2) as i ";
     WordNetQuery +="MATCH (n:WN_Word {word:text[i]}) ";
     WordNetQuery +="MATCH (w1:Word {name:text[i]}) ";
     WordNetQuery +="MERGE (w1)-[:WN_LINK]->(n);";
@@ -104,6 +112,9 @@ session
     .then(function (result){
         console.log("transcript created");
         console.log(WordImportQuery);
+        console.log("Wordnet Query");
+        console.log("=============");
+        console.log(WordNetQuery);
     })
     .catch(function(err){
         console.log(err);
@@ -141,14 +152,14 @@ session
     });
 
 //connect towordnet 
-//    session
- //   .run(WordNetQuery)
-  //  .then(function (result){
-   //    console.log("Connected to WordNet");
-//    })
-  //  .catch(function(err){
-   //     console.log(err);
-  //  });
+    session
+   .run(WordNetQuery)
+    .then(function (result){
+       console.log("Connected to WordNet");
+    })
+    .catch(function(err){
+        console.log(err);
+    });
 
 
 //run the clean queries
@@ -202,6 +213,10 @@ app.get('/review', function (req, res) {
 
 app.get('/about', function (req, res) {
   res.render('about')
+})
+
+app.get('/view', function (req, res) {
+    res.render('view')
 })
 
 
