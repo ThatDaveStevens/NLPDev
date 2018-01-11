@@ -4,10 +4,7 @@ var logger = require ('morgan');
 var bodyParser = require ('body-parser');
 var neo4j = require('neo4j-driver').v1;
 var app = express();
-
-
-var datajson = require('./views/miserables.json');
-
+var datafile = require('./files/standalone.json');
 
 
 //View engine
@@ -18,6 +15,9 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(express.static(path.join(__dirname,'public')));
+app.use("/files", express.static(__dirname + '/files'));
+app.use("/js", express.static(__dirname + '/files/js'));
+
 
 var driver = neo4j.driver('bolt://localhost',neo4j.auth.basic('neo4j','neo4j'));
 var session=driver.session();
@@ -217,6 +217,11 @@ app.get('/about', function (req, res) {
 
 app.get('/view', function (req, res) {
     res.render('view')
+})
+
+
+app.get('/view2', function (req, res) {
+    res.render('view2')
 })
 
 
